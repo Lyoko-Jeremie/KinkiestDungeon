@@ -691,6 +691,7 @@ KinkyDungeonKeyPass,Pass thru allies
 KinkyDungeonKeyAStruggle,Auto-Struggle
 KinkyDungeonKeyAPathfind,Auto-Pathfind
 KinkyDungeonKeySprint,Sprint/Hop
+KinkyDungeonKeyInspect,Inspect
 
 KinkyDungeonKeyQInventory,Quick Inventory
 KinkyDungeonKeyInventory,Inventory
@@ -809,6 +810,8 @@ KinkyDungeonConsumableQuantity,Quantity:
 KinkyDungeonConsume,Use Item (Consumes 1)
 
 KinkyDungeonInventoryItemnull,way of the fist
+KinkyDungeonInventoryItemPick,Lockpick
+KinkyDungeonInventoryItemKeyring,Exit Keys
 
 KinkyDungeonInventoryItemDefault,Wizard's Outfit
 KinkyDungeonInventoryItemDefaultDesc,Your favorite outfit for adventuring.
@@ -2259,6 +2262,8 @@ KinkyDungeonStruggleUnlockFail3,"You work on unlocking the TargetRestraint with 
 KinkyDungeonStruggleUnlockDrop,"You fiddle with the key on the TargetRestraint..."
 
 KinkyDungeonStruggleUnlockNoRedKey,"The lock requires a key."
+KinkyDungeonStruggleUnlockNoRed_HiKey,"The lock requires a key."
+KinkyDungeonStruggleUnlockNoRed_MedKey,"The lock requires a key."
 KinkyDungeonStruggleUnlockNoGreenKey,"The green padlock only accepts green keys."
 KinkyDungeonStruggleUnlockNoYellowKey,"The yellow padlock requires a red and a green key."
 KinkyDungeonStruggleUnlockNoBlueKey,"The magical lock only accepts blue keys and can't be picked."
@@ -3971,6 +3976,31 @@ KinkyDungeonUnEquip,"Unequip"
 KinkyDungeonEquip,"Equip"
 KinkyDungeonEquipped,"Equipped"
 
+
+KDTileTooltip0,Floor
+KDTileTooltip1,Wall
+KDTileTooltip2,Brickwork
+KDTileTooltipX,Doodad
+KDTileTooltipL,Furniture
+KDTileTooltipT,Table
+KDTileTooltipA,Shrine
+KDTileTooltipa,Ruined Shrine
+KDTileTooltipO,Orb Altar
+KDTileTooltipo,Empty Altar
+KDTileTooltipC,Chest
+KDTileTooltipc,Empty Chest
+KDTileTooltipR,Shiny Object
+KDTileTooltipY,Shiny Object
+KDTileTooltip4,Crack
+KDTileTooltipHook,Hook
+KDTileTooltipS,Entrance
+KDTileTooltips,Exit Stairs
+KDTileTooltipH,Mysterious Stairs
+KDTileTooltipG,Ghostly Adventurer
+
+
+
+
 KinkyDungeonBookElements,Ars Pyrotecnica
 KinkyDungeonBookConjure,Codex Imaginus
 KinkyDungeonBookIllusion,Clavicula Romantica
@@ -4255,7 +4285,7 @@ KinkyDungeonSpellTargetEvasion,Choose creature to buff
 
 
 KinkyDungeonSpellAnalyze,Magical Sight
-KinkyDungeonSpellDescriptionAnalyze,"Highlight the location of interesting magical phenomena for 12 turns"
+KinkyDungeonSpellDescriptionAnalyze,"Highlight the location of interesting magical phenomena for 20 turns"
 KinkyDungeonSpellCastAnalyze,You analyze the target!
 KinkyDungeonSpellTargetAnalyze,Choose object to analyze
 
@@ -4847,7 +4877,7 @@ KinkyDungeonSpellTrueSight,Truesight
 KinkyDungeonSpellDescriptionTrueSight,When enabled: Drain mana every turn to see through walls and increase accuracy by 40%.
 
 KinkyDungeonSpellEnemySense,Heartsense
-KinkyDungeonSpellDescriptionEnemySense,Highlight the locations of enemies through walls on the map for 4 turns.
+KinkyDungeonSpellDescriptionEnemySense,Highlight the locations of enemies through walls on the map for 12 turns.
 
 KinkyDungeonSpellLight,Light
 KinkyDungeonSpellDescriptionLight,"Produce a bright light for Duration turns. Has no effect in dark rooms."
@@ -5522,13 +5552,13 @@ KinkyDungeonRepNamePleased,"Thankful"
 KinkyDungeonRepNameBlessed,"Pleased"
 KinkyDungeonRepNameThankful,"Blessed"
 
-KinkyDungeonRepNameFaction,"Interested"
+KinkyDungeonRepNameFaction,"Neutral"
 KinkyDungeonRepNameFactionAngered,"Annoyed"
 KinkyDungeonRepNameFactionEnraged,"Hostile"
 KinkyDungeonRepNameFactionCursed,"Wanted"
-KinkyDungeonRepNameFactionPleased,"Favorable"
+KinkyDungeonRepNameFactionPleased,"Friendly"
 KinkyDungeonRepNameFactionBlessed,"Allied"
-KinkyDungeonRepNameFactionThankful,"Friendly"
+KinkyDungeonRepNameFactionThankful,"Favorable"
 
 KinkyDungeonTetherTooShort,"You run up against the TETHER pulling you back."
 KinkyDungeonTetherPull,"You are yanked back by the TETHER!"
@@ -8727,3 +8757,5 @@ KDDialogueRemoteLinkCuffs,That should slow you down!
 KDDialogueRemoteLinkCuffsNevermere,Try running away now~
 KDDialogueRemoteLinkCuffsAncientRobot,Initiating prisoner lockdown protocol
 KDMsgRemoteLinkCuffs,Your RestraintName suddenly snap together as the EnemyName activates them
+
+

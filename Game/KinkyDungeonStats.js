@@ -209,9 +209,10 @@ let KDClassStart = {
 		KinkyDungeonInventoryAddWeapon("ArcaneCrystal");
 		KDGameData.PreviousWeapon = "Knife";
 		KDSetWeapon("ArcaneCrystal");
-		KinkyDungeonSpells.push(KinkyDungeonFindSpell("MPUp1"));
-		KinkyDungeonSpells.push(KinkyDungeonFindSpell("MPUp1"));
 		KinkyDungeonSpells.push(KinkyDungeonFindSpell("Analyze"));
+		KinkyDungeonSpellChoices.push(KinkyDungeonSpells.length - 1);
+		KinkyDungeonSpells.push(KinkyDungeonFindSpell("MPUp1"));
+		KinkyDungeonSpells.push(KinkyDungeonFindSpell("MPUp1"));
 		KinkyDungeonSpellPoints = 3;
 		KinkyDungeonRedKeys = 1;
 		KinkyDungeonGold = 100;
@@ -814,7 +815,7 @@ function KinkyDungeonUpdateStats(delta) {
 			} else {
 				if (KinkyDungeonCanOrgasm() && KDGameData.OrgasmStamina < 0.5 && KDGameData.PlaySelfTurns < 1) {
 					KinkyDungeonDoTryOrgasm(KinkyDungeonTeaseLevel);
-					KinkyDungeonSendTextMessage(5, TextGet("KinkyDungeonOrgasmAutomatic"), "#FF5BE9", KinkyDungeonOrgasmStunTime + 1);
+					KinkyDungeonSendTextMessage(5, TextGet("KinkyDungeonOrgasmAutomatic"), "#FF5BE9", KinkyDungeonOrgasmStunTime + 1, true);
 					KDGameData.OrgasmNextStageTimer = 1;
 				}
 			}

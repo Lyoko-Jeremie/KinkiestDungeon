@@ -227,6 +227,8 @@ let KDLeashPullKneelTime = 8;
  * @returns {boolean}
  */
 function KinkyDungeonUpdateTether(Msg, Entity, xTo, yTo) {
+	if (Entity.player && KinkyDungeonFlags.get("pulled")) return false;
+	else if (KDEnemyHasFlag(Entity, "pulled")) return false;
 	let exceeded = false;
 	for (let inv of KinkyDungeonAllRestraint()) {
 		if (KDRestraint(inv).tether && (inv.tx && inv.ty || inv.tetherToLeasher || inv.tetherToGuard || inv.tetherEntity)) {
@@ -301,21 +303,31 @@ function KinkyDungeonUpdateTether(Msg, Entity, xTo, yTo) {
 								if (slot2) {
 									KDMoveEntity(enemy, slot2.x, slot2.y, false);
 								} else {
-									KDMoveEntity(enemy, Entity.x, Entity.y, false);
+									let pointSwap = KinkyDungeonGetNearbyPoint(slot.x, slot.y, true, undefined, true, true);
+									if (pointSwap)
+										KDMoveEntity(enemy, pointSwap.x, pointSwap.y, false);
+									else
+										KDMoveEntity(enemy, Entity.x, Entity.y, false);
 								}
 							}
 
 							KDMoveEntity(Entity, slot.x, slot.y, false);
-							if (KinkyDungeonCanStand()) {
-								KDGameData.KneelTurns = Math.max(KDGameData.KneelTurns, KDLeashPullKneelTime + KinkyDungeonSlowMoveTurns);
-								KinkyDungeonChangeStamina(-KDLeashPullCost, false, true);
+							if (Entity.player) KinkyDungeonSetFlag("pulled", 1);
+							else KinkyDungeonSetEnemyFlag(Entity, "pulled");
+							if (Entity.player) {
+								if (KinkyDungeonCanStand()) {
+									KDGameData.KneelTurns = Math.max(KDGameData.KneelTurns, KDLeashPullKneelTime + KinkyDungeonSlowMoveTurns);
+									KinkyDungeonChangeStamina(-KDLeashPullCost, false, true);
+								}
+								KinkyDungeonInterruptSleep();
+								KinkyDungeonSendEvent("leashTug", {Entity: Entity, slot: slot, item: inv});
+								if (KinkyDungeonLeashingEnemy()) {
+									KinkyDungeonSetEnemyFlag(KinkyDungeonLeashingEnemy(), "harshpull", 5);
+								}
+								if (Msg) KinkyDungeonSendActionMessage(10, TextGet("KinkyDungeonTetherPull").replace("TETHER", TextGet("Restraint" + inv.name)), "#ff0000", 2, true);
+
 							}
-							KinkyDungeonInterruptSleep();
-							KinkyDungeonSendEvent("leashTug", {Entity: Entity, slot: slot, item: inv});
-							if (KinkyDungeonLeashingEnemy()) {
-								KinkyDungeonSetEnemyFlag(KinkyDungeonLeashingEnemy(), "harshpull", 5);
-							}
-							if (Msg) KinkyDungeonSendActionMessage(10, TextGet("KinkyDungeonTetherPull").replace("TETHER", TextGet("Restraint" + inv.name)), "#ff0000", 2, true);
+
 						}
 					}
 				}
@@ -1939,6 +1951,14 @@ function KinkyDungeonGetLockMult(Lock) {
 	return 1;
 }
 
+/** Tags which the 'agnostic' option on KinkyDungeonGetRestraint does not override */
+let KDNoOverrideTags = [
+	"NoVibes",
+	"Unmasked",
+	"Unchained",
+	"Damsel",
+];
+
 /**
  *
  * @param {KDHasTags} enemy
@@ -1950,9 +1970,11 @@ function KinkyDungeonGetLockMult(Lock) {
  * @param {*} LeashingOnly
  * @param {*} NoStack
  * @param {*} extraTags
+ * @param {*} agnostic - Determines if playertags and current bondage are ignored
+ * @param {{minPower?: number, maxPower?: number, onlyLimited?: boolean, noUnlimited?: boolean, noLimited?: boolean, onlyUnlimited?: boolean, ignore?: string[], require?: string[], looseLimit?: boolean, ignoreTags?: string[]}} [filter] - Filters for items
  * @returns
  */
-function KinkyDungeonGetRestraint(enemy, Level, Index, Bypass, Lock, RequireWill, LeashingOnly, NoStack, extraTags) {
+function KinkyDungeonGetRestraint(enemy, Level, Index, Bypass, Lock, RequireWill, LeashingOnly, NoStack, extraTags, agnostic, filter) {
 	let restraintWeightTotal = 0;
 	if (KinkyDungeonStatsChoice.has("NoWayOut")) RequireWill = false;
 	let restraintWeights = [];
@@ -1976,6 +1998,12 @@ function KinkyDungeonGetRestraint(enemy, Level, Index, Bypass, Lock, RequireWill
 			if (Level >= t[1])
 				tags.set(t[0], true);
 		}
+
+	if (filter?.ignoreTags) {
+		for (let ft of filter.ignoreTags) {
+			tags.delete(ft);
+		}
+	}
 
 	let arousalMode = KinkyDungeonStatsChoice.get("arousalMode");
 	let cache = [];
@@ -2004,16 +2032,26 @@ function KinkyDungeonGetRestraint(enemy, Level, Index, Bypass, Lock, RequireWill
 	let start = performance.now();
 	for (let r of cache) {
 		let restraint = r.r;
+		if (filter) {
+			if (filter.maxPower && r.r.power > filter.maxPower) continue;
+			if (filter.minPower && r.r.power < filter.minPower && (!filter.looseLimit || !r.r.limited) && !r.r.unlimited) continue;
+			if (filter.onlyUnlimited && r.r.limited) continue;
+			if (filter.noUnlimited && r.r.unlimited) continue;
+			if (filter.noLimited && r.r.limited) continue;
+			if (filter.onlyLimited && !r.r.limited && !r.r.unlimited) continue;
+			if (filter.ignore && filter.ignore.includes(r.r.name)) continue;
+			if (filter.require && !filter.require.includes(r.r.name)) continue;
+		}
 		if ((!LeashingOnly || (restraint.Group == "ItemNeck" || restraint.Group == "ItemNeckRestraints"))
 			&& (!RequireWill || !restraint.maxwill || willPercent <= restraint.maxwill || (LeashingOnly && (restraint.Group == "ItemNeck" || restraint.Group == "ItemNeckRestraints"))))
-			if (KDCanAddRestraint(restraint, Bypass, Lock, NoStack, undefined, KinkyDungeonStatsChoice.has("MagicHands") ? true : undefined)) {
+			if (agnostic || KDCanAddRestraint(restraint, Bypass, Lock, NoStack, undefined, KinkyDungeonStatsChoice.has("MagicHands") ? true : undefined)) {
 
 				restraintWeights.push({restraint: restraint, weight: restraintWeightTotal});
 				let weight = r.w;
 				weight += restraint.weight;
 				if (restraint.playerTags)
 					for (let tag in restraint.playerTags)
-						if (KinkyDungeonPlayerTags.get(tag)) weight += restraint.playerTags[tag];
+						if ((!agnostic || !KDNoOverrideTags.includes(tag)) && KinkyDungeonPlayerTags.get(tag)) weight += restraint.playerTags[tag];
 				restraintWeightTotal += Math.max(0, weight);
 			}
 	}

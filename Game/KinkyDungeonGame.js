@@ -689,6 +689,15 @@ function KinkyDungeonCreateMap(MapParams, Floor, testPlacement, seed) {
 						tags.push(t);
 				}
 			}
+
+			KDGameData.JailFaction = [];
+			if (mapMod?.jailType) KDGameData.JailFaction.push(mapMod.jailType);
+			else if (altType?.jailType) KDGameData.JailFaction.push(altType.jailType);
+
+			KDGameData.GuardFaction = [];
+			if (mapMod?.guardType) KDGameData.GuardFaction.push(mapMod.guardType);
+			else if (altType?.guardType) KDGameData.GuardFaction.push(mapMod.guardType);
+
 			// Place enemies after player
 			if (!altType || altType.enemies) {
 				let bonus = (mapMod && mapMod.bonusTags) ? mapMod.bonusTags : undefined;
@@ -737,6 +746,12 @@ function KinkyDungeonCreateMap(MapParams, Floor, testPlacement, seed) {
 			if (altType && altType.tickFlags)
 				KinkyDungeonSendEvent("tickFlags", {delta: 1});
 			KinkyDungeonSendEvent("postQuest", {});
+
+			for (let e of KinkyDungeonGetAllies()) {
+				KDMoveEntity(e, KinkyDungeonStartPosition.x, KinkyDungeonStartPosition.y, false);
+				e.visual_x = KinkyDungeonStartPosition.x;
+				e.visual_y = KinkyDungeonStartPosition.y;
+			}
 		}
 	}
 
@@ -897,6 +912,12 @@ function KinkyDungeonPlaceEnemies(spawnPoints, InJail, Tags, BonusTags, Floor, w
 
 	if (factionAllied) randomFactions.push(factionAllied);
 	if (factionEnemy) randomFactions.push(factionEnemy);
+
+	KDGameData.JailFaction.push(primaryFaction);
+	KDGameData.GuardFaction.push(primaryFaction);
+	if (factionAllied) {
+		KDGameData.GuardFaction.push(factionAllied);
+	}
 
 	console.log(randomFactions[0] + "," + randomFactions[1] + "," + randomFactions[2]);
 
@@ -1141,9 +1162,8 @@ function KinkyDungeonPlaceEnemies(spawnPoints, InJail, Tags, BonusTags, Floor, w
 					KinkyDungeonSetEnemyFlag(e, shop, -1);
 				}
 				let loadout = KinkyDungeonGetLoadoutForEnemy(e, false);
-				if (loadout) {
-					e.items = Object.assign([], KDLoadouts[loadout].items);
-				}
+				KDSetLoadout(e, loadout);
+
 				if (!spawnPoint && !currentCluster && Enemy.clusterWith) {
 					let clusterChance = 0.5; //1.1 + 0.9 * MiniGameKinkyDungeonLevel/KinkyDungeonMaxLevel;
 					if (Enemy.tags.boss) clusterChance = 0;
@@ -2804,7 +2824,7 @@ function KinkyDungeonGetDirectionRandom(dx, dy) {
 let KinkyDungeonAutoWaitSuppress = false;
 
 function KinkyDungeonControlsEnabled() {
-	return KinkyDungeonSlowMoveTurns < 1 && KinkyDungeonStatFreeze < 1 && KDGameData.SleepTurns < 1 && !KDGameData.CurrentDialog && !KinkyDungeonMessageToggle;
+	return !KinkyDungeonInspect && KinkyDungeonSlowMoveTurns < 1 && KinkyDungeonStatFreeze < 1 && KDGameData.SleepTurns < 1 && !KDGameData.CurrentDialog && !KinkyDungeonMessageToggle;
 }
 
 function KDStartSpellcast(tx, ty, SpellToCast, enemy, player, bullet) {
@@ -3005,6 +3025,7 @@ function KinkyDungeonGameKeyDown() {
 			case KinkyDungeonKeyToggle[2]: KinkyDungeonToggleAutoDoor = !KinkyDungeonToggleAutoDoor; break;
 			case KinkyDungeonKeyToggle[3]: KinkyDungeonFastStruggle = !KinkyDungeonFastStruggle; break;
 			case KinkyDungeonKeyToggle[4]: KinkyDungeonFastMove = !KinkyDungeonFastMove; break;
+			case KinkyDungeonKeyToggle[5]: KinkyDungeonInspect = !KinkyDungeonInspect; break;
 		}
 		if (KinkyDungeonSound) AudioPlayInstantSoundKD(KinkyDungeonRootDirectory + "/Audio/Click.ogg");
 		return true;
@@ -3184,6 +3205,7 @@ function KinkyDungeonGameKeyUp(lastPress) {
 				case KinkyDungeonKeyToggle[2]: KinkyDungeonToggleAutoDoor = !KinkyDungeonToggleAutoDoor; break;
 				case KinkyDungeonKeyToggle[3]: KinkyDungeonFastStruggle = !KinkyDungeonFastStruggle; break;
 				case KinkyDungeonKeyToggle[4]: KinkyDungeonFastMove = !KinkyDungeonFastMove; break;
+				case KinkyDungeonKeyToggle[5]: KinkyDungeonInspect = !KinkyDungeonInspect; break;
 			}
 			if (KinkyDungeonSound) AudioPlayInstantSoundKD(KinkyDungeonRootDirectory + "/Audio/Click.ogg");
 			return true;
