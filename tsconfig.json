@@ -108,6 +108,7 @@
         "Game/KDDelayedActions.js",
         "Game/KDCommander.js",
         "Scripts/KDMods.ts",
+        "Scripts/KDModsPatch.ts",
         "Scripts/Main.ts",
         "Data/Filters.ts",
         "Data/Preload.ts",
